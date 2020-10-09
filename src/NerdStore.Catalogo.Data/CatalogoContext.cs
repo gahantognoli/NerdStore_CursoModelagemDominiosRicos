@@ -9,7 +9,7 @@ namespace NerdStore.Catalogo.Data
 {
     public class CatalogoContext : DbContext, IUnitOfWork
     {
-        public CatalogoContext(DbContextOptions<CatalogoContext> options)
+        public CatalogoContext(DbContextOptions<CatalogoContext> options) : base(options)
         {
         }
 
