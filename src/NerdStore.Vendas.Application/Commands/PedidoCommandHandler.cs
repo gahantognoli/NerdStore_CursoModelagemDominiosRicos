@@ -1,7 +1,11 @@
 ﻿using MediatR;
+using NerdStore.Core.Bus;
 using NerdStore.Core.Messages;
+using NerdStore.Core.Messages.CommonMessages.Notifications;
+using NerdStore.Vendas.Domain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,11 +14,45 @@ namespace NerdStore.Vendas.Application.Commands
 {
     public class PedidoCommandHandler : IRequestHandler<AdicionarItemPedidoCommand, bool>
     {
+        private readonly IPedidoRepository _pedidoRepository;
+        private readonly IMediatrHandler _mediatrHandler;
+
+        public PedidoCommandHandler(IPedidoRepository pedidoRepository, IMediatrHandler mediatrHandler)
+        {
+            _pedidoRepository = pedidoRepository;
+            _mediatrHandler = mediatrHandler;
+        }
+
         public async Task<bool> Handle(AdicionarItemPedidoCommand message, CancellationToken cancellationToken)
         {
             if (!ValidarComando(message)) return false;
 
-            return true;
+            var pedido = await _pedidoRepository.ObterPedidoRascunhoPorClienteId(message.ClienteId);
+            var pedidoItem = new PedidoItem(message.ProdutoId, message.Nome, message.Quantidade, message.ValorUnitario);
+
+            if(pedido == null)
+            {
+                pedido = Pedido.PedidoFactory.NovoPedidoRascunho(message.ClienteId);
+                pedido.AdicionarItem(pedidoItem);
+
+                _pedidoRepository.Adicionar(pedido);
+            }
+            else
+            {
+                var pedidoItemExistente = pedido.PedidoItemExistente(pedidoItem);
+                pedido.AdicionarItem(pedidoItem);
+
+                if (pedidoItemExistente)
+                {
+                    _pedidoRepository.AtualizarItem(pedido.PedidoItens.FirstOrDefault(pedido => pedido.ProdutoId == pedido.ProdutoId));
+                }
+                else
+                {
+                    _pedidoRepository.AdicionarItem(pedidoItem);
+                }
+            }
+
+            return await _pedidoRepository.UnitOfWork.Commit();
         }
 
         private bool ValidarComando(Command message)
@@ -23,7 +61,7 @@ namespace NerdStore.Vendas.Application.Commands
 
             foreach (var error in message.ValidationResult.Errors)
             {
-                //lançar um evento de erro
+                _mediatrHandler.PublicarNotificacao(new DomainNotification(message.MessageType, error.ErrorMessage));
             }
 
             return false;
