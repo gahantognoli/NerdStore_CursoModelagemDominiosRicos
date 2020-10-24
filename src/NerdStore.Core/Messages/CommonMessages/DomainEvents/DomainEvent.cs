@@ -7,7 +7,7 @@ namespace NerdStore.Core.DomainObjects
     {
         public DomainEvent(Guid aggregateId)
         {
-            AggreateId = aggregateId;
+            AggregateId = aggregateId;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace NerdStore.Vendas.Application.Commands
         public Guid ProdutoId { get; private set; }
         public int Quantidade { get; private set; }
 
-        public AtualizarItemPedidoCommand(Guid clienteId, Guid produtoId int quantidade)
+        public AtualizarItemPedidoCommand(Guid clienteId, Guid produtoId, int quantidade)
         {
             ClienteId = clienteId;
             ProdutoId = produtoId;

@@ -11,7 +11,7 @@ namespace NerdStore.Vendas.Application.Events
 
         public PedidoProdutoRemovidoEvent(Guid clienteId, Guid pedidoId, Guid produtoId)
         {
-            AggreateId = pedidoId;
+            AggregateId = pedidoId;
             ClienteId = clienteId;
             PedidoId = pedidoId;
             ProdutoId = produtoId;

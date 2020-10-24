@@ -12,7 +12,7 @@ namespace NerdStore.Vendas.Application.Events
 
         public PedidoProdutoAtualizadoEvent(Guid clienteId, Guid pedidoId, Guid produtoId, int quantidade)
         {
-            AggreateId = pedidoId;
+            AggregateId = pedidoId;
             ClienteId = clienteId;
             PedidoId = pedidoId;
             ProdutoId = produtoId;
